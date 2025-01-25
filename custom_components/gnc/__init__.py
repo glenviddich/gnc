@@ -1,36 +1,49 @@
-import logging
 import subprocess
-import os
+import logging
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "gnc"
+# Starten einer Instanz des gn_server.jar auf dem angegebenen Port
+def start_gn_server_instance(port):
+    """Starte eine Instanz des gn_server.jar auf dem angegebenen Port."""
+    try:
+        subprocess.Popen(
+            ["java", "-jar", "/config/custom_components/gnc/gn_server.jar", f"-p", f"{port}"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        _LOGGER.info(f"Starte gn_server.jar auf Port {port}")
+    except Exception as e:
+        _LOGGER.error(f"Fehler beim Starten des gn_server auf Port {port}: {e}")
 
-def setup(hass, config):
-    """Set up the GNC integration."""
-    _LOGGER.info("Setting up GNC integration...")
+# Starten mehrerer Instanzen des gn_server.jar auf verschiedenen Ports
+def start_multiple_instances(ports):
+    """Starte mehrere Instanzen des gn_server.jar auf verschiedenen Ports."""
+    for i, port in enumerate(ports):
+        if i == 0:
+            start_gn_server_instance(port)
 
-    # Pfad zur JAR-Datei
-    jar_path = os.path.join(
-        hass.config.path("custom_components"), DOMAIN, "gn_server.jar"
+# Stoppen aller laufenden gn_server Instanzen
+def stop_gn_server_instance():
+    """Stoppe alle laufenden gn_server Instanzen."""
+    try:
+        for pid in os.popen("pgrep -f 'gn_server.jar'").read().splitlines():
+            os.kill(int(pid), signal.SIGTERM)
+        _LOGGER.info("Alle gn_server Instanzen gestoppt.")
+    except Exception as e:
+        _LOGGER.error(f"Fehler beim Stoppen des gn_server: {e}")
+
+# Einrichten der Dienste in Home Assistant
+async def async_setup(hass, config):
+    """Setze die Integration auf."""
+    hass.services.async_register(
+        "gnc", "start_server", start_multiple_instances
+    )
+    hass.services.async_register(
+        "gnc", "stop_server", stop_gn_server_instance
     )
 
-    if not os.path.isfile(jar_path):
-        _LOGGER.error("gn_server.jar not found at %s", jar_path)
-        return False
-
-    _LOGGER.info("Found gn_server.jar at %s", jar_path)
-
-    # Versuche, den Server zu starten
-    try:
-        command = f"java -jar {jar_path}"
-        _LOGGER.info("Executing command: %s", command)
-        subprocess.Popen(
-            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        _LOGGER.info("GNC server started successfully.")
-    except Exception as e:
-        _LOGGER.error("Failed to start GNC server: %s", str(e))
-        return False
+    # Die Konfiguration über das Frontend ermöglichen
+    hass.data["gnc"] = {}
 
     return True
