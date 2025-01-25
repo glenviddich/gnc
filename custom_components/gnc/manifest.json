@@ -1,0 +1,10 @@
+{
+    "domain": "gnc",
+    "name": "GN Server",
+    "version": "1.0.0",
+    "documentation": "https://github.com/deinbenutzername/gnc",
+    "requirements": [],
+    "dependencies": [],
+    "codeowners": ["@glenviddich"]
+  }
+  
