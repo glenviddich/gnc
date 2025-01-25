@@ -1,1 +1,15 @@
+{
+  "name": "GN Server",
+  "version": "3.2.3",
+  "slug": "gn_server",
+  "description": "Startet einen GN-Server",
+  "startup": "application",
+  "boot": "auto",
+  "ports": {
+    "6767/tcp": 6767
+  },
+  "schema": {},
+  "options": {},
+  "arch": ["amd64", "aarch64", "armv7"]
+}
 
