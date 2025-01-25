@@ -1,7 +1,7 @@
 {
     "domain": "gnc",
     "name": "GN Server",
-    "version": "3.2.3",
+    "version": "1.0.1",
     "documentation": "https://github.com/deinbenutzername/gnc",
     "requirements": [],
     "dependencies": [],
