@@ -1,35 +1,37 @@
-import logging
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.const import CONF_HOST, CONF_PORT
+import voluptuous as vol
+import logging
 
 _LOGGER = logging.getLogger(__name__)
 
-class GncConfigFlow(config_entries.ConfigFlow, domain="gnc"):
-    """Handle a config flow for GNC Server."""
-
+class GncConfigFlow(config_entries.ConfigFlow):
+    """Handle a config flow for GNC."""
+    
+    VERSION = 1
+    
     def __init__(self):
-        """Initialize the GNC config flow."""
-        self.ports = []
+        self.host = None
+        self.port = None
 
     async def async_step_user(self, user_input=None):
-        """Handle the initial user input."""
+        """Handle the user input for the config flow."""
         if user_input is not None:
-            self.ports = user_input["ports"]
+            # Validating user input and saving it
+            self.host = user_input[CONF_HOST]
+            self.port = user_input[CONF_PORT]
+            
+            # Store the user input (host and port) and return the result
             return self.async_create_entry(
-                title="GNC Server", data={"ports": self.ports}
+                title=f"{self.host}:{self.port}",
+                data={CONF_HOST: self.host, CONF_PORT: self.port}
             )
+        
+        # If no input, show the form to the user
         return self.async_show_form(
-            step_id="user", data_schema=self._get_data_schema()
-        )
-
-    def _get_data_schema(self):
-        """Return the data schema for the form."""
-        import voluptuous as vol
-        from homeassistant.helpers import config_validation as cv
-
-        return vol.Schema(
-            {
-                vol.Required("ports"): cv.ensure_list,
-            }
+            step_id="user",
+            data_schema=vol.Schema({
+                vol.Required(CONF_HOST): str,
+                vol.Required(CONF_PORT, default=6990): int
+            })
         )
