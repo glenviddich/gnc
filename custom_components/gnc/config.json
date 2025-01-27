@@ -2,7 +2,7 @@
   "name": "GN Server",
   "version": "3.2.3",
   "slug": "gn_server",
-  "description": "Startet einen GN-Server",
+  "description": "Startet den GN-Server",
   "startup": "application",
   "boot": "auto",
   "ports": {
